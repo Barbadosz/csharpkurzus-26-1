@@ -1,12 +1,37 @@
 ﻿using System.Diagnostics;
 
 using Calculator.Core;
+using Calculator.HTTP;
+
+internal class ConsoleLogger : ILogger
+{
+    private object _lock = new object();
+    public void Info(string message)
+    {
+        Console.WriteLine(message);
+    }
+    public void Error(string message)
+    {
+        lock(_lock) //ettől a locktól lesz szálbiztos
+        {
+            Console.WriteLine(message);
+        }
+    }
+}
 
 internal class Program
 {
     private static int Main(string[] args)
     {
-        Console.WriteLine("Welcome to the calculator!");
+        using HttpServer server = new(new ConsoleLogger(), port: 8080);
+        server.Start();
+        Console.ReadLine();
+        server.Stop();
+        return 0;
+
+
+
+        /*Console.WriteLine("Welcome to the calculator!");
         Console.Write("> ");
 
         string expression = Console.ReadLine() ?? string.Empty;
@@ -25,6 +50,6 @@ internal class Program
             return -1;
         }
 
-        throw new UnreachableException("This shouldn't happen");
+        throw new UnreachableException("This shouldn't happen");*/
     }
 }
